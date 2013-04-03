@@ -1,0 +1,135 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#define ASCII_A 65
+#define ASCII_Z 90
+#define NUMLETTER 26
+
+using namespace std;
+
+//Introduce the user to the program
+void Welcome()
+{
+  cout << "\n\n\n\n\n\t\t\tWelcome to the Enigma\n\n";
+	cout << "\tThe purpose of this program is to encrypt a message.\n";
+	cout << "\tOnce a user provides the program with a message,\n";
+	cout << "\tthe program will systematically encrypt it using\n"; 
+	cout << "\ta plugboard a series of rotors and a reflector.\n";
+	cout << "\tThe output of this program will be unreadable.\n";
+	cout << "\tThis ensures security of sensitive information\n";
+	cout << "\tbetween the sender and the reciever\n\n\n\n";
+}
+
+//changes the letters of the string by swapping each char
+char Plugboard(char letter)
+{
+	string plugboard = "abcdefghijklmnopqrstuvwxyz";
+	string* ptrPlugboard = &plugboard;
+	int ascii = int(letter);
+	if(ascii >= ASCII_A && ascii <= ASCII_Z)
+	{
+		return char(ptrPlugboard->at(ascii - ASCII_A));
+	}
+
+	cout << "invalid character";
+	return ' ';
+}
+
+char Rotor(char letter, string* rotor, int *rotate)
+{
+	int ascii = int(letter);
+	
+	if(ascii >= ASCII_A && ascii <= ASCII_Z)
+	{
+		ascii = rotor->at(ascii - ASCII_A + *rotate % NUMLETTER);
+
+		if(ascii > ASCII_Z)
+		{
+			return char(ASCII_A + ascii % NUMLETTER);
+		}
+
+		return char(ascii);
+	}
+
+	cout << "invalid input";
+	return ' ';
+}
+
+char Reflector(char letter)
+{
+	int ascii = int(letter);
+
+	if(ascii >= ASCII_A && ascii <= ASCII_Z)
+	{
+		ascii = ascii + NUMLETTER / 2;
+
+		if(ascii > ASCII_Z)
+		{
+			return char(ASCII_A + ascii % NUMLETTER);
+		}
+
+		return char(ascii);
+	}
+
+	cout << "invalid input";
+	return ' ';
+}
+
+int main()
+{
+	char quit;
+	string message, eMessage;
+	string* ptrMessage = &message;
+	string* ptrEMessage = &eMessage;
+	string rotor1 = "abcdefghijklmnopqrstuvwxyz";
+	string rotor2 = "abcdefghijklmnopqrstuvwxyz";
+	string rotor3 = "abcdefghijklmnopqrstuvwxyz";
+	int rotate1, rotate2, rotate3;
+	rotate1 = rotate2 = rotate3 = 0;
+
+	Welcome();
+
+	cout << "Please enter the message to be encrypted\n";
+	cin >> message;
+
+	eMessage = message;
+
+	for(int i = 0; i < ptrEMessage->length(); i++)
+	{
+		if(ptrEMessage->at(i) == ' ')
+		{
+			ptrEMessage->erase(i);
+		}
+
+		ptrEMessage->at(i) = Plugboard(toupper(ptrEMessage->at(i)));
+		cout << "Plugboard returns: " << ptrEMessage->at(i) << '\n'; // testing
+		ptrEMessage->at(i) = Rotor(toupper(ptrEMessage->at(i)), &rotor1, &rotate1);
+		cout << "Rotor1 returns: " << ptrEMessage->at(i) << '\n'; // testing
+		ptrEMessage->at(i) = Rotor(toupper(ptrEMessage->at(i)), &rotor2, &rotate2);
+		cout << "Rotor2 returns: " << ptrEMessage->at(i) << '\n'; // testing
+		ptrEMessage->at(i) = Rotor(toupper(ptrEMessage->at(i)), &rotor3, &rotate3);
+		cout << "Rotor3 returns: " << ptrEMessage->at(i) << '\n'; // testing
+		ptrEMessage->at(i) = Reflector(toupper(ptrEMessage->at(i)));
+		ptrEMessage->at(i) = Rotor(toupper(ptrEMessage->at(i)), &rotor3, &rotate3);
+		ptrEMessage->at(i) = Rotor(toupper(ptrEMessage->at(i)), &rotor2, &rotate2);
+		ptrEMessage->at(i) = Rotor(toupper(ptrEMessage->at(i)), &rotor1, &rotate1);
+
+		rotate1 = rotate1 + 1;
+
+		if(rotate1 % (NUMLETTER / 2) == 0)
+		{
+			rotate2 = rotate2 + 1;
+
+			if(rotate2 % (NUMLETTER / 2) == 0)
+			{
+				rotate3 = rotate3 + 1;
+			}
+		}
+	}
+
+	cout << "The encrypted message is\n";
+	cout << eMessage << '\n';
+
+	cin >> quit;
+}
+
