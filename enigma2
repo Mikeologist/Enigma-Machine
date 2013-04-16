@@ -1,0 +1,221 @@
+// main.cpp
+
+#include <iostream>
+#include <string>
+#include "Plugboard.h"
+#include "Reflector.h"
+#include "Rotor.h"
+
+#define NUMLETTER 26
+
+using namespace std;
+
+void Welcome()
+{
+  cout << "\n\n\n\n\n\t\t\tWelcome to the Enigma\n\n";
+	cout << "\tThe purpose of this program is to encrypt a message.\n";
+	cout << "\tOnce a user provides the program with a message,\n";
+	cout << "\tthe program will systematically encrypt it using\n"; 
+	cout << "\ta plugboard a series of rotors and a reflector.\n";
+	cout << "\tThe output of this program will be unreadable.\n";
+	cout << "\tThis ensures security of sensitive information\n";
+	cout << "\tbetween the sender and the reciever\n\n\n\n";
+}
+
+int main()
+{
+	int end;
+	string message, eMessage;
+	string* ptrMessage = &message;
+	string* ptrEMessage = &eMessage;
+	Plugboard plug("abcdefghijklmnopqrstuvwxyz");
+	Rotor rotor1("abcdefghijklmnopqrstuvwxyz", 0); 
+	Rotor rotor2("abcdefghijklmnopqrstuvwxyz", 0);
+	Rotor rotor3("abcdefghijklmnopqrstuvwxyz", 0);
+	Reflector reflect("abcdefghijklmnopqrstuvwxyz");
+	Welcome();
+
+	cout << "Please enter the message to be encrypted\n";
+	cin >> message;
+
+	eMessage = message;
+
+	for(int i = 0; i < ptrEMessage->length(); i++)
+	{
+		ptrEMessage->at(i) = plug.GetLetter(ptrEMessage->at(i));
+		ptrEMessage->at(i) = rotor1.GetLetter(ptrEMessage->at(i));
+		ptrEMessage->at(i) = rotor2.GetLetter(ptrEMessage->at(i));
+		ptrEMessage->at(i) = rotor3.GetLetter(ptrEMessage->at(i));
+		ptrEMessage->at(i) = reflect.GetLetter(ptrEMessage->at(i));
+		ptrEMessage->at(i) = rotor3.GetLetter(ptrEMessage->at(i));
+		ptrEMessage->at(i) = rotor2.GetLetter(ptrEMessage->at(i));
+		ptrEMessage->at(i) = rotor1.GetLetter(ptrEMessage->at(i));
+
+		rotor1.Rotate();
+
+		if(rotor1.numRotate % (NUMLETTER / 2) == 0)
+		{
+			rotor2.Rotate();
+
+			if(rotor2.numRotate % (NUMLETTER / 2) == 0)
+			{
+				rotor3.Rotate();
+			}
+		}
+	}
+	cout << "The encrypted message is\n";
+	cout << eMessage << '\n';
+	cin >> end;
+}
+
+// Plugboard.cpp
+
+#include <string>
+#include <iostream>
+
+using namespace std;
+
+#define ASCII_A 65
+#define ASCII_Z 90
+
+class Plugboard
+{
+  public:
+		string alpha;
+
+		Plugboard(string alpha)
+		{
+			this->alpha = alpha;
+		}
+
+		char GetLetter(char letter)
+		{
+			if(int(letter) >= ASCII_A && int(letter) <= ASCII_Z)
+			{
+				return char(alpha.at(int(letter) - ASCII_A));
+			}
+
+			cout << "invalid character";
+			return ' ';
+		}
+}
+
+// Plugboard.h
+
+#include <iostream>
+
+using namespace std;
+
+class Plugboard
+{
+  public:
+		string alpha;
+		Plugboard(string);
+		char GetLetter(char);
+}
+
+// Reflector.cpp
+
+#include <string>
+#include <iostream>
+
+using namespace std;
+
+#define ASCII_A 65
+#define ASCII_Z 90
+#define NUMLETTER 26
+
+class Reflector
+{
+  string alpha;
+	public:
+		Reflector(string alpha)
+		{
+			this->alpha = alpha;
+		}
+
+		char GetLetter(char letter)
+		{
+			int ascii;
+			if(int(letter) >= ASCII_A && int(letter <= ASCII_Z))
+			{
+				ascii = int(letter) + NUMLETTER / 2;
+				
+				if(ascii > ASCII_Z)
+				{
+					return char(ASCII_A + ascii % NUMLETTER);
+				}
+
+				return char(ascii);
+			}
+
+			cout << "invalid input";
+			return ' ';
+
+		}
+}
+
+// Reflector.h
+
+class Reflector
+{
+  public:
+		string alpha;
+		Reflector(string);
+		char GetLetter(char);
+}
+
+// Rotor.cpp
+
+#include <string>
+
+using namespace std;
+
+#define ASCII_A 65
+#define ASCII_Z 90
+#define NUMLETTER 26
+
+class Rotor
+{
+  public:
+		string alpha;
+		int numRotate;
+
+		Rotor(string alpha, int numRotate)
+		{
+			this->alpha = alpha;
+			this->numRotate = numRotate;
+		}
+
+		void Rotate()
+		{
+			this->numRotate = this->numRotate + 1;
+		}
+
+		char GetLetter(char letter)
+		{
+			if(int(letter) >= ASCII_A && int(letter) <= ASCII_Z)
+			{
+				return this->alpha.at(int(letter) - ASCII_A + this->numRotate % NUMLETTER);
+			}
+
+			else
+				return ' ';
+		}
+};
+
+// Rotor.h
+
+#include <iostream>
+
+using namespace std;
+
+class Rotor
+{
+  public:
+		string alpha;
+		int numRotate;
+		Rotor(string, int);
+		void Rotate();
+		char GetLetter(char);
+}
