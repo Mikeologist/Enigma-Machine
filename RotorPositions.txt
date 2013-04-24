@@ -1,0 +1,3 @@
+Rotor 1 Position -> B
+Rotor 2 Position -> G
+Rotor 3 Position -> H
